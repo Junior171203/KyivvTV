@@ -31,15 +31,14 @@
       white-space: pre-line;
       flex-direction: column;
     }
-    /* увеличенный фон по твоей просьбе */
     #backgroundText {
-      font-size: 3.5em;
+      font-size: 3.5em; /* 🔥 увеличено с 2.5em */
       z-index: 1;
     }
     #message {
       font-size: 3.5em;
       z-index: 2;
-      color: #073763; /* тёмно-синий */
+      color: #073763;
       background: linear-gradient(135deg, #e0f0ff, #a0c8ff);
       box-shadow: 0 4px 15px rgba(0, 60, 120, 0.4);
       border-radius: 12px;
@@ -88,7 +87,7 @@
       animation: pulseGlow 2s infinite alternate;
     }
 
-    /* Медали — без анимаций (как в исходнике) */
+    /* Медали — без анимаций */
     #backgroundText td:has(> .medal),
     #backgroundText td:contains("🥇"),
     #backgroundText td:contains("🥈"),
@@ -138,7 +137,13 @@
     let showingNotification = false;
     let lastBgIncludedSitdown = false;
 
-    // Разрешение звука — как раньше: только по кнопке
+    const defaultBackground =
+      'radial-gradient(circle, #0b1e3d 40%, #000000 100%),' +
+      'radial-gradient(circle at 20% 30%, #fff 1px, transparent 2px),' +
+      'radial-gradient(circle at 80% 70%, #fff 1px, transparent 2px),' +
+      'radial-gradient(circle at 50% 50%, #fff 1px, transparent 2px)';
+    const defaultColor = '#a0e7ff';
+
     soundBtn.addEventListener('click', () => {
       notifySound.play().then(() => {
         notifySound.pause();
@@ -157,7 +162,7 @@
     async function fetchBackground() {
       try {
         const res = await fetch(BG_URL);
-        const values = await res.json(); // ожидаем 9 строк (M1..M9)
+        const values = await res.json();
 
         let html = '<table>';
         values.forEach(row => {
@@ -176,25 +181,24 @@
         html += '</table>';
         bgDiv.innerHTML = html;
 
-        // стандартная подсветка строк
         applyRowHighlightAnimation();
 
-        // 🔴 Подсветка M9 (последняя строка): красный фон + жирный белый текст
+        // --- ДОБАВЛЕНО: дизайн для M9 (последней строки) ---
         const rows = bgDiv.querySelectorAll('table tr');
         if (rows.length > 0) {
           const lastRow = rows[rows.length - 1];
-          lastRow.style.animation = 'none'; // чтобы красный не «мигал»
-          const lastCells = lastRow.querySelectorAll('td');
-          lastCells.forEach(td => {
-            td.style.backgroundColor = '#d32f2f';
-            td.style.color = '#ffffff';
-            td.style.fontWeight = '700';
+          lastRow.style.animation = 'none'; // чтобы красный фон не мерцал
+          lastRow.querySelectorAll('td').forEach(td => {
+            td.style.backgroundColor = '#d32f2f'; // красный фон
+            td.style.color = '#ffffff';          // белый текст
+            td.style.fontWeight = '700';         // жирный
           });
         }
+        // --- КОНЕЦ ДОБАВКИ ---
 
-        // ловим «можем садиться» в фоне (логика как была)
         const flatValues = values.flat().join(' ').toLowerCase();
         const containsSitdown = flatValues.includes('можем садиться');
+
         if (containsSitdown && !lastBgIncludedSitdown) {
           showSitdown();
         }
@@ -215,7 +219,6 @@
 
     function showSitdown() {
       if (showingNotification) return;
-
       showingNotification = true;
       msgDiv.textContent = 'МОЖЕМ САДИТЬСЯ';
       msgDiv.style.display = 'flex';
@@ -223,19 +226,13 @@
 
       document.body.style.background = 'linear-gradient(135deg, #e0f0ff, #a0c8ff)';
       document.body.style.color = '#073763';
-
-      // звук — только если пользователь нажал кнопку и браузер его разрешил
       sitdownSound.play().catch(console.error);
 
       setTimeout(() => {
         msgDiv.style.display = 'none';
         bgDiv.style.display = 'flex';
-        document.body.style.background = 
-          'radial-gradient(circle, #0b1e3d 40%, #000000 100%),' +
-          'radial-gradient(circle at 20% 30%, #fff 1px, transparent 2px),' +
-          'radial-gradient(circle at 80% 70%, #fff 1px, transparent 2px),' +
-          'radial-gradient(circle at 50% 50%, #fff 1px, transparent 2px)';
-        document.body.style.color = '#a0e7ff';
+        document.body.style.background = defaultBackground;
+        document.body.style.color = defaultColor;
         showingNotification = false;
       }, 20000);
 
@@ -247,12 +244,10 @@
 
     async function fetchMessages() {
       if (showingNotification || queue.length > 0) return;
-
       try {
         const res = await fetch(MESSAGES_URL);
         const messages = await res.json();
         const filtered = messages.filter(msg => !msg.toLowerCase().includes('можем садиться'));
-
         if (filtered.length > 0) {
           queue.push(...filtered);
           showNextMessage();
@@ -273,22 +268,14 @@
 
       document.body.style.background = 'linear-gradient(135deg, #e0f0ff, #a0c8ff)';
       document.body.style.color = '#073763';
-
       notifySound.play().catch(console.error);
 
       setTimeout(() => {
         msgDiv.style.display = 'none';
         bgDiv.style.display = 'flex';
-
-        document.body.style.background = 
-          'radial-gradient(circle, #0b1e3d 40%, #000000 100%),' +
-          'radial-gradient(circle at 20% 30%, #fff 1px, transparent 2px),' +
-          'radial-gradient(circle at 80% 70%, #fff 1px, transparent 2px),' +
-          'radial-gradient(circle at 50% 50%, #fff 1px, transparent 2px)';
-        document.body.style.color = '#a0e7ff';
-
+        document.body.style.background = defaultBackground;
+        document.body.style.color = defaultColor;
         showingNotification = false;
-
         if (queue.length > 0) showNextMessage();
       }, 20000);
 
