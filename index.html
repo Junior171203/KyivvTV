@@ -31,7 +31,7 @@
       white-space: pre-line;
       flex-direction: column;
     }
-    /* увеличенный фон, как просил */
+    /* увеличенный фон по твоей просьбе */
     #backgroundText {
       font-size: 3.5em;
       z-index: 1;
@@ -88,7 +88,7 @@
       animation: pulseGlow 2s infinite alternate;
     }
 
-    /* Медали — без анимаций (как у тебя было) */
+    /* Медали — без анимаций (как в исходнике) */
     #backgroundText td:has(> .medal),
     #backgroundText td:contains("🥇"),
     #backgroundText td:contains("🥈"),
@@ -105,6 +105,7 @@
       100% { background-color: transparent; }
     }
 
+    /* Пульс для заголовка */
     @keyframes pulseGlow {
       0% { text-shadow: 0 0 8px #0f0, 0 0 16px #0f0; }
       100% { text-shadow: 0 0 14px #0f0, 0 0 28px #0f0; }
@@ -116,7 +117,7 @@
   <div id="message"></div>
   <button id="enableSound">🔊 Включить звук</button>
 
-  <audio id="notifySound" src="mamонт2.mp3"></audio>
+  <audio id="notifySound" src="mamont2.mp3"></audio>
   <audio id="sitdownSound" src="sitdown.mp3"></audio>
 
   <script>
@@ -137,13 +138,7 @@
     let showingNotification = false;
     let lastBgIncludedSitdown = false;
 
-    const defaultBackground =
-      'radial-gradient(circle, #0b1e3d 40%, #000000 100%),' +
-      'radial-gradient(circle at 20% 30%, #fff 1px, transparent 2px),' +
-      'radial-gradient(circle at 80% 70%, #fff 1px, transparent 2px),' +
-      'radial-gradient(circle at 50% 50%, #fff 1px, transparent 2px)';
-    const defaultColor = '#a0e7ff';
-
+    // Разрешение звука — как раньше: только по кнопке
     soundBtn.addEventListener('click', () => {
       notifySound.play().then(() => {
         notifySound.pause();
@@ -181,24 +176,23 @@
         html += '</table>';
         bgDiv.innerHTML = html;
 
-        // как у тебя: лёгкая подсветка строк
+        // стандартная подсветка строк
         applyRowHighlightAnimation();
 
-        // 🔴 ДОБАВКА: выделяем M9 (последнюю строку) — красный фон и жирный текст
+        // 🔴 Подсветка M9 (последняя строка): красный фон + жирный белый текст
         const rows = bgDiv.querySelectorAll('table tr');
         if (rows.length > 0) {
           const lastRow = rows[rows.length - 1];
-          // отключим анимацию для последней строки, чтобы не перебивала красный
-          lastRow.style.animation = 'none';
+          lastRow.style.animation = 'none'; // чтобы красный не «мигал»
           const lastCells = lastRow.querySelectorAll('td');
           lastCells.forEach(td => {
-            td.style.backgroundColor = '#d32f2f'; // красный
-            td.style.color = '#ffffff';          // читаемый текст
-            td.style.fontWeight = '700';         // жирный
+            td.style.backgroundColor = '#d32f2f';
+            td.style.color = '#ffffff';
+            td.style.fontWeight = '700';
           });
         }
 
-        // ловим «можем садиться» в фоне (как раньше)
+        // ловим «можем садиться» в фоне (логика как была)
         const flatValues = values.flat().join(' ').toLowerCase();
         const containsSitdown = flatValues.includes('можем садиться');
         if (containsSitdown && !lastBgIncludedSitdown) {
@@ -230,13 +224,18 @@
       document.body.style.background = 'linear-gradient(135deg, #e0f0ff, #a0c8ff)';
       document.body.style.color = '#073763';
 
+      // звук — только если пользователь нажал кнопку и браузер его разрешил
       sitdownSound.play().catch(console.error);
 
       setTimeout(() => {
         msgDiv.style.display = 'none';
         bgDiv.style.display = 'flex';
-        document.body.style.background = defaultBackground;
-        document.body.style.color = defaultColor;
+        document.body.style.background = 
+          'radial-gradient(circle, #0b1e3d 40%, #000000 100%),' +
+          'radial-gradient(circle at 20% 30%, #fff 1px, transparent 2px),' +
+          'radial-gradient(circle at 80% 70%, #fff 1px, transparent 2px),' +
+          'radial-gradient(circle at 50% 50%, #fff 1px, transparent 2px)';
+        document.body.style.color = '#a0e7ff';
         showingNotification = false;
       }, 20000);
 
@@ -274,13 +273,20 @@
 
       document.body.style.background = 'linear-gradient(135deg, #e0f0ff, #a0c8ff)';
       document.body.style.color = '#073763';
+
       notifySound.play().catch(console.error);
 
       setTimeout(() => {
         msgDiv.style.display = 'none';
         bgDiv.style.display = 'flex';
-        document.body.style.background = defaultBackground;
-        document.body.style.color = defaultColor;
+
+        document.body.style.background = 
+          'radial-gradient(circle, #0b1e3d 40%, #000000 100%),' +
+          'radial-gradient(circle at 20% 30%, #fff 1px, transparent 2px),' +
+          'radial-gradient(circle at 80% 70%, #fff 1px, transparent 2px),' +
+          'radial-gradient(circle at 50% 50%, #fff 1px, transparent 2px)';
+        document.body.style.color = '#a0e7ff';
+
         showingNotification = false;
 
         if (queue.length > 0) showNextMessage();
